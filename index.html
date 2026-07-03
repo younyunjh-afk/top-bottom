@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1~6월 누계 매출 상위·하위 매장 현황</title>
+<style>
+:root{
+  --bg:#0b0e18;
+  --card:#161b2c;
+  --card2:#1c2236;
+  --border:#252c42;
+  --text:#e8ebf5;
+  --sub:#8890a8;
+  --blue:#5b9bf7;
+  --green:#37d399;
+  --amber:#f5b942;
+  --red:#f76b8a;
+  --pink1:#ff6fb0;
+  --pink2:#a06bff;
+  --brand-szm:#5b9bf7;
+  --brand-list:#ff6fb0;
+  --brand-sysn:#37d399;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:"Pretendard","Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+  padding:0 0 60px 0;
+}
+.topbar{
+  height:6px;
+  background:linear-gradient(90deg,var(--pink1),var(--pink2),var(--blue));
+}
+.header{
+  padding:32px 40px 20px 40px;
+  border-bottom:1px solid var(--border);
+}
+.header h1{
+  font-size:24px;
+  font-weight:700;
+  letter-spacing:-0.3px;
+}
+.header .sub{
+  margin-top:8px;
+  color:var(--sub);
+  font-size:13px;
+  line-height:1.7;
+}
+.header .sub b{color:var(--text);font-weight:600;}
+.container{
+  max-width:1200px;
+  margin:0 auto;
+  padding:24px 40px;
+}
+.legend{
+  display:flex;
+  gap:18px;
+  flex-wrap:wrap;
+  margin-bottom:24px;
+  padding:14px 18px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:10px;
+  font-size:12.5px;
+  color:var(--sub);
+}
+.legend span{display:flex;align-items:center;gap:6px;}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+.dot.up{background:var(--green);}
+.dot.down{background:var(--red);}
+.dot.new{background:var(--amber);}
+
+.brand-block{
+  margin-bottom:14px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  overflow:hidden;
+  background:var(--card);
+}
+.brand-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:16px 20px;
+  cursor:pointer;
+  user-select:none;
+}
+.brand-header .left{display:flex;align-items:center;gap:12px;}
+.brand-tag{
+  width:5px;height:22px;border-radius:3px;
+}
+.brand-header h2{font-size:17px;font-weight:700;}
+.brand-header .meta{font-size:12px;color:var(--sub);}
+.chevron{
+  width:10px;height:10px;
+  border-right:2px solid var(--sub);
+  border-bottom:2px solid var(--sub);
+  transform:rotate(45deg);
+  transition:transform .2s;
+}
+.brand-block.open > .brand-header .chevron{transform:rotate(-135deg);}
+.brand-body{
+  max-height:0;
+  overflow:hidden;
+  transition:max-height .25s ease;
+}
+.brand-block.open > .brand-body{max-height:20000px;}
+
+.channel-block{
+  border-top:1px solid var(--border);
+}
+.channel-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:13px 20px 13px 36px;
+  cursor:pointer;
+  user-select:none;
+  background:var(--card2);
+}
+.channel-header .left{display:flex;align-items:center;gap:10px;}
+.channel-header h3{font-size:14.5px;font-weight:600;}
+.channel-header .meta{font-size:11.5px;color:var(--sub);}
+.channel-chevron{
+  width:8px;height:8px;
+  border-right:2px solid var(--sub);
+  border-bottom:2px solid var(--sub);
+  transform:rotate(45deg);
+  transition:transform .2s;
+}
+.channel-block.open .channel-chevron{transform:rotate(-135deg);}
+.channel-body{
+  max-height:0;
+  overflow:hidden;
+  transition:max-height .25s ease;
+  background:var(--bg);
+}
+.channel-block.open .channel-body{max-height:6000px;}
+
+.tables-wrap{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  padding:16px 20px 20px 36px;
+}
+@media(max-width:820px){.tables-wrap{grid-template-columns:1fr;}}
+
+.table-card{
+  border:1px solid var(--border);
+  border-radius:10px;
+  overflow:hidden;
+  background:var(--card);
+}
+.table-card .cap{
+  padding:10px 14px;
+  font-size:12.5px;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  border-bottom:1px solid var(--border);
+}
+.table-card.top .cap{color:var(--green);}
+.table-card.bottom .cap{color:var(--red);}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+th{
+  text-align:right;
+  padding:8px 10px;
+  color:var(--sub);
+  font-weight:600;
+  font-size:11px;
+  border-bottom:1px solid var(--border);
+}
+th:first-child, th:nth-child(2){text-align:left;}
+td{
+  padding:8px 10px;
+  text-align:right;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+  white-space:nowrap;
+}
+td:first-child{text-align:center;color:var(--sub);width:24px;}
+td.name{text-align:left;font-weight:500;}
+tr:last-child td{border-bottom:none;}
+.growth-up{color:var(--green);font-weight:600;}
+.growth-down{color:var(--red);font-weight:600;}
+.growth-na{color:var(--sub);}
+.new-tag{
+  font-size:9.5px;
+  background:rgba(245,185,66,0.15);
+  color:var(--amber);
+  padding:1px 5px;
+  border-radius:4px;
+  margin-left:5px;
+  font-weight:600;
+}
+.empty-note{
+  padding:16px;
+  color:var(--sub);
+  font-size:12px;
+  text-align:center;
+}
+</style>
+</head>
+<body>
+<div class="topbar"></div>
+<div class="header">
+  <h1>1~6월 누계 매출 상위 · 하위 7개점 현황</h1>
+  <div class="sub">
+    기준 시트: <b>1~6누계 신장률</b> · 브랜드 → 유통망 → 코드(매장) 기준 F열(26년 1~6월 누계 매출) 상위 7개점 / 하위 7개점 선정<br>
+    매출 단위 <b>백만원</b> · 신장률 = <b>(F − G) / G</b> (F: 26년 1~6월 누계, G: 25년 동기간 매출)<br>
+    하위 7개점 선정 제외 대상: <b>26년 1월 1일 이후 오픈 매장</b>, 비고란 <b>복합매장·무인매장·26년도 오픈</b> 표기 매장
+  </div>
+</div>
+<div class="container">
+  <div class="legend">
+    <span><span class="dot up"></span>신장률 플러스(전년比 성장)</span>
+    <span><span class="dot down"></span>신장률 마이너스(전년比 역신장)</span>
+    <span><span class="dot new"></span>신규 오픈 매장(전년 동기 매출 없음, N/A)</span>
+  </div>
+  <div id="root"></div>
+</div>
+
+<script>
+const DATA = {"쉬즈미스": {"백화점": {"total": 47, "top": [{"name": "롯데부산", "code": "S16402", "f": 1375.0, "g": 1626.5, "growth": -15.5, "opendate": "2008-04-22", "note": null}, {"name": "신세계광주", "code": "S15602", "f": 1063.3, "g": 1308.8, "growth": -18.8, "opendate": "2008-08-24", "note": null}, {"name": "롯데잠실", "code": "S11003", "f": 929.1, "g": 1195.5, "growth": -22.3, "opendate": "1998-08-01", "note": null}, {"name": "롯데본점", "code": "S11001", "f": 918.7, "g": 1579.8, "growth": -41.8, "opendate": "2002-02-25", "note": null}, {"name": "현대천호", "code": "S11005", "f": 562.5, "g": 687.5, "growth": -18.2, "opendate": "1997-08-01", "note": null}, {"name": "롯데노원", "code": "S11004", "f": 553.7, "g": 616.0, "growth": -10.1, "opendate": "2004-05-25", "note": null}, {"name": "용산아이파크", "code": "S11012", "f": 483.9, "g": 533.7, "growth": -9.3, "opendate": "2016-05-23", "note": null}], "bottom": [{"name": "롯데상인", "code": "S16609", "f": 92.8, "g": 152.6, "growth": -39.2, "opendate": "2024-07-23", "note": null}, {"name": "롯데미아", "code": "S11010", "f": 119.6, "g": 111.3, "growth": 7.5, "opendate": "2006-12-20", "note": null}, {"name": "AK평택", "code": "S12012", "f": 126.2, "g": 147.8, "growth": -14.6, "opendate": "2014-02-28", "note": null}, {"name": "롯데건대", "code": "S11019", "f": 138.6, "g": 122.7, "growth": 12.9, "opendate": "2019-08-26", "note": null}, {"name": "신세계김해", "code": "S16008", "f": 147.6, "g": 149.2, "growth": -1.1, "opendate": "2023-08-22", "note": null}, {"name": "신세계의정부", "code": "S12010", "f": 148.3, "g": 257.3, "growth": -42.4, "opendate": "2012-04-05", "note": null}, {"name": "AK원주", "code": "S13001", "f": 155.3, "g": 193.4, "growth": -19.7, "opendate": "2012-03-20", "note": null}]}, "아울렛": {"total": 93, "top": [{"name": "현대아울렛김포", "code": "S32039", "f": 1482.4, "g": 1450.2, "growth": 2.2, "opendate": "2019-03-29", "note": null}, {"name": "현대아울렛대전", "code": "S34609", "f": 1056.4, "g": 1175.9, "growth": -10.2, "opendate": "2022-02-21", "note": null}, {"name": "현대아울렛남양주", "code": "S32046", "f": 991.3, "g": 987.4, "growth": 0.4, "opendate": "2020-10-19", "note": "복합매장"}, {"name": "롯데아울렛파주", "code": "S32048", "f": 930.4, "g": 933.3, "growth": -0.3, "opendate": "2021-06-24", "note": null}, {"name": "롯데아울렛김해", "code": "S36002", "f": 712.9, "g": 660.8, "growth": 7.9, "opendate": "2016-02-24", "note": null}, {"name": "NC송파", "code": "S31007", "f": 659.0, "g": 728.6, "growth": -9.6, "opendate": "2010-05-27", "note": null}, {"name": "뉴코아강남", "code": "S31023", "f": 632.3, "g": 653.2, "growth": -3.2, "opendate": "2015-10-12", "note": null}], "bottom": [{"name": "동아수성", "code": "S36603", "f": 59.6, "g": 87.8, "growth": -32.2, "opendate": "2012-03-13", "note": null}, {"name": "한섬아울렛광주", "code": "S35604", "f": 76.7, "g": 93.4, "growth": -17.9, "opendate": "2020-02-21", "note": null}, {"name": "세이브존노원", "code": "S31013", "f": 81.4, "g": 114.6, "growth": -29.0, "opendate": "2012-10-05", "note": null}, {"name": "롯데아울렛구리", "code": "S32021", "f": 92.0, "g": 84.4, "growth": 8.9, "opendate": "2014-12-15", "note": null}, {"name": "세이브존성남", "code": "S32041", "f": 94.6, "g": 79.6, "growth": 18.7, "opendate": "2019-06-25", "note": null}, {"name": "동아구미", "code": "S36206", "f": 95.0, "g": 117.2, "growth": -18.9, "opendate": "2023-03-22", "note": null}, {"name": "NC수원터미널", "code": "S32017", "f": 106.1, "g": 109.0, "growth": -2.6, "opendate": "2014-04-01", "note": null}]}, "쇼핑몰": {"total": 15, "top": [{"name": "스타필드코엑스몰", "code": "S41017", "f": 2236.0, "g": 2133.9, "growth": 4.8, "opendate": "2020-02-01", "note": null}, {"name": "타임스퀘어", "code": "S41004", "f": 1047.9, "g": 1033.7, "growth": 1.4, "opendate": "2014-09-05", "note": null}, {"name": "스타필드하남", "code": "S42007", "f": 963.7, "g": 907.7, "growth": 6.2, "opendate": "2021-03-26", "note": null}, {"name": "스타필드고양", "code": "S42001", "f": 849.4, "g": 814.2, "growth": 4.3, "opendate": "2017-08-01", "note": null}, {"name": "스타필드수원", "code": "S42009", "f": 741.6, "g": 945.6, "growth": -21.6, "opendate": "2024-01-24", "note": null}, {"name": "스타필드안성", "code": "S42005", "f": 530.0, "g": 567.2, "growth": -6.6, "opendate": "2020-09-15", "note": null}, {"name": "스퀘어원", "code": "S42501", "f": 520.2, "g": 509.5, "growth": 2.1, "opendate": "2015-09-10", "note": null}], "bottom": [{"name": "아이파크고척", "code": "S41022", "f": 243.2, "g": 229.7, "growth": 5.9, "opendate": "2022-12-22", "note": null}, {"name": "롯데몰수지", "code": "S42004", "f": 276.9, "g": 270.2, "growth": 2.5, "opendate": "2019-08-30", "note": null}, {"name": "타임스트림", "code": "S41020", "f": 290.6, "g": 220.7, "growth": 31.6, "opendate": "2021-07-22", "note": null}, {"name": "마곡원그로브", "code": "S41027", "f": 380.2, "g": 33.4, "growth": 1040.1, "opendate": "2025-05-23", "note": null}, {"name": "스타필드시티위례", "code": "S42002", "f": 428.1, "g": 352.1, "growth": 21.6, "opendate": "2018-12-14", "note": null}, {"name": "메타폴리스몰", "code": "S42008", "f": 453.3, "g": 523.7, "growth": -13.4, "opendate": "2022-04-01", "note": null}, {"name": "이스트폴구의", "code": "S41028", "f": 460.6, "g": 59.0, "growth": 680.3, "opendate": "2025-05-28", "note": null}]}, "직영가두점": {"total": 7, "top": [{"name": "수유직영점", "code": "S41026", "f": 384.2, "g": 270.1, "growth": 42.2, "opendate": "2024-01-23", "note": null}, {"name": "낙성대직영", "code": "S41021", "f": 359.5, "g": 394.5, "growth": -8.9, "opendate": "2021-08-20", "note": null}, {"name": "테헤란로점", "code": "S41015", "f": 357.0, "g": 402.4, "growth": -11.3, "opendate": "2019-10-10", "note": null}, {"name": "양재직영점", "code": "S41011", "f": 301.4, "g": 333.9, "growth": -9.7, "opendate": "2016-10-12", "note": null}, {"name": "구로디지털단지", "code": "S41025", "f": 257.1, "g": 231.9, "growth": 10.9, "opendate": "2023-10-11", "note": null}, {"name": "방이직영점", "code": "S41029", "f": 212.1, "g": 55.1, "growth": 284.6, "opendate": "2025-05-23", "note": null}, {"name": "상봉직영점", "code": "S41031", "f": 170.4, "g": null, "growth": null, "opendate": "2026-03-03", "note": "26년도 오픈"}], "bottom": []}, "팩토리아울렛": {"total": 6, "top": [{"name": "남양주팩토리", "code": "S42013", "f": 902.5, "g": 63.9, "growth": 1313.1, "opendate": "2025-06-13", "note": null}, {"name": "파주운정팩토리", "code": "S42012", "f": 743.0, "g": 85.2, "growth": 772.1, "opendate": "2025-06-13", "note": null}, {"name": "포천팩토리", "code": "S42505", "f": 638.6, "g": null, "growth": null, "opendate": "2025-08-01", "note": null}, {"name": "천안팩토리", "code": "S44001", "f": 518.1, "g": null, "growth": null, "opendate": "2025-10-10", "note": null}, {"name": "일산팩토리", "code": "S42018", "f": 456.0, "g": null, "growth": null, "opendate": "2026-01-21", "note": "26년도 오픈"}, {"name": "인천구월팩토리", "code": "S42503", "f": 279.9, "g": 70.9, "growth": 295.0, "opendate": "2025-04-25", "note": null}], "bottom": []}, "대리점": {"total": 50, "top": [{"name": "김포장기점", "code": "S22003", "f": 405.2, "g": 341.3, "growth": 18.7, "opendate": "2008-04-04", "note": null}, {"name": "제주이도점", "code": "S27010", "f": 387.5, "g": null, "growth": null, "opendate": "2026-01-15", "note": "26년도 오픈"}, {"name": "천호점", "code": "S21018", "f": 366.7, "g": 397.1, "growth": -7.6, "opendate": "2024-10-17", "note": null}, {"name": "인덕원점", "code": "S22001", "f": 356.7, "g": 363.7, "growth": -1.9, "opendate": "2006-07-01", "note": null}, {"name": "아차산점", "code": "S21020", "f": 338.6, "g": 360.1, "growth": -6.0, "opendate": "2024-12-01", "note": null}, {"name": "방배점", "code": "S21019", "f": 287.6, "g": 264.8, "growth": 8.6, "opendate": "2024-11-05", "note": null}, {"name": "인천부평점", "code": "S22510", "f": 279.8, "g": 256.5, "growth": 9.1, "opendate": "2024-03-22", "note": null}], "bottom": [{"name": "안양중앙점", "code": "S22012", "f": 63.1, "g": 76.8, "growth": -17.8, "opendate": "2012-09-05", "note": null}, {"name": "충주점", "code": "S24304", "f": 85.3, "g": 89.5, "growth": -4.7, "opendate": "2012-08-02", "note": null}, {"name": "속초점", "code": "S23013", "f": 87.6, "g": 84.1, "growth": 4.1, "opendate": "2018-11-15", "note": null}, {"name": "순천연향점", "code": "S25018", "f": 90.3, "g": 85.0, "growth": 6.2, "opendate": "2024-08-06", "note": null}, {"name": "춘천석사점", "code": "S23006", "f": 92.4, "g": 100.4, "growth": -8.0, "opendate": "2014-09-20", "note": null}, {"name": "화성봉담점", "code": "S22051", "f": 94.1, "g": 106.1, "growth": -11.4, "opendate": "2021-06-03", "note": null}, {"name": "광주첨단점", "code": "S25609", "f": 100.0, "g": 91.9, "growth": 8.8, "opendate": "2016-09-08", "note": null}]}, "입점몰": {"total": 18, "top": [{"name": "퀸잇", "code": "S51032", "f": 2086.1, "g": 3727.3, "growth": -44.0, "opendate": "2021-06-10", "note": null}, {"name": "롯데ON", "code": "S51021", "f": 802.3, "g": 2363.0, "growth": -66.0, "opendate": "2018-08-01", "note": null}, {"name": "SSG닷컴", "code": "S51030", "f": 519.3, "g": 515.6, "growth": 0.7, "opendate": "2020-08-05", "note": null}, {"name": "SSF샵", "code": "S51043", "f": 321.4, "g": 694.7, "growth": -53.7, "opendate": "2025-02-01", "note": null}, {"name": "하프클럽", "code": "S51005", "f": 289.5, "g": 1063.1, "growth": -72.8, "opendate": "2016-09-12", "note": null}, {"name": "포스티", "code": "S51037", "f": 271.7, "g": 1423.6, "growth": -80.9, "opendate": "2022-08-08", "note": null}, {"name": "GS SHOP", "code": "S51002", "f": 229.6, "g": 1561.1, "growth": -85.3, "opendate": "2016-08-16", "note": null}], "bottom": [{"name": "LF스퀘어몰", "code": "S51044", "f": 0.1, "g": null, "growth": null, "opendate": "2025-08-01", "note": null}, {"name": "패션플러스", "code": "S51042", "f": 3.8, "g": 105.9, "growth": -96.4, "opendate": "2024-10-01", "note": null}, {"name": "롯데아이몰", "code": "S51014", "f": 7.3, "g": 256.9, "growth": -97.2, "opendate": "2017-05-22", "note": null}, {"name": "현대홈쇼핑", "code": "S51001", "f": 9.5, "g": 160.6, "growth": -94.1, "opendate": "2016-08-16", "note": null}, {"name": "컬리", "code": "S51045", "f": 11.7, "g": null, "growth": null, "opendate": "2025-09-24", "note": null}, {"name": "신세계라이브쇼핑", "code": "S51041", "f": 21.3, "g": 134.7, "growth": -84.2, "opendate": "2024-06-10", "note": null}, {"name": "LF몰", "code": "S51027", "f": 169.2, "g": 178.5, "growth": -5.2, "opendate": "2019-08-01", "note": null}]}, "자사몰": {"total": 1, "top": [{"name": "자사몰", "code": "S51012", "f": 4747.9, "g": 3744.9, "growth": 26.8, "opendate": "2017-03-07", "note": null}], "bottom": []}}, "리스트": {"백화점": {"total": 43, "top": [{"name": "현대대구", "code": "T16605", "f": 1207.3, "g": 1266.5, "growth": -4.7, "opendate": "2018-03-16", "note": null}, {"name": "AK수원", "code": "T12005", "f": 740.4, "g": 872.7, "growth": -15.2, "opendate": "2010-08-20", "note": null}, {"name": "신세계대구", "code": "T16607", "f": 654.0, "g": 928.7, "growth": -29.6, "opendate": "2022-07-15", "note": null}, {"name": "롯데부산", "code": "T16401", "f": 545.5, "g": 886.6, "growth": -38.5, "opendate": "2008-07-24", "note": null}, {"name": "용산아이파크", "code": "T11014", "f": 539.9, "g": 537.3, "growth": 0.5, "opendate": "2016-12-19", "note": null}, {"name": "신세계광주", "code": "T15602", "f": 521.9, "g": 637.6, "growth": -18.2, "opendate": "2019-07-31", "note": null}, {"name": "갤러리아타임월드", "code": "T14602", "f": 509.5, "g": 842.5, "growth": -39.5, "opendate": "2013-09-27", "note": null}], "bottom": [{"name": "롯데관악", "code": "T11004", "f": 24.5, "g": 22.5, "growth": 9.1, "opendate": "2008-08-05", "note": null}, {"name": "롯데센텀시티", "code": "T11009", "f": 64.4, "g": 67.6, "growth": -4.7, "opendate": "2014-08-19", "note": null}, {"name": "신세계마산", "code": "T16201", "f": 80.3, "g": 92.5, "growth": -13.1, "opendate": "2014-01-28", "note": null}, {"name": "롯데일산", "code": "T12009", "f": 107.6, "g": 128.0, "growth": -15.9, "opendate": "2012-08-01", "note": null}, {"name": "현대신촌", "code": "T11006", "f": 140.4, "g": 161.4, "growth": -13.0, "opendate": "2010-07-20", "note": null}, {"name": "갤러리아센터시티", "code": "T14001", "f": 149.5, "g": 575.3, "growth": -74.0, "opendate": "2014-08-18", "note": null}, {"name": "신세계김해", "code": "T16405", "f": 150.7, "g": 136.8, "growth": 10.1, "opendate": "2018-02-08", "note": null}]}, "아울렛": {"total": 99, "top": [{"name": "현대아울렛대전", "code": "T34606", "f": 1322.7, "g": 1422.3, "growth": -7.0, "opendate": "2020-06-19", "note": null}, {"name": "롯데아울렛광주월드컵", "code": "T35601", "f": 994.7, "g": 965.5, "growth": 3.0, "opendate": "2008-10-24", "note": null}, {"name": "현대아울렛송도", "code": "T32507", "f": 993.1, "g": 900.8, "growth": 10.3, "opendate": "2018-08-30", "note": null}, {"name": "롯데아울렛김해", "code": "T36002", "f": 968.5, "g": 865.5, "growth": 11.9, "opendate": "2013-06-24", "note": null}, {"name": "현대아울렛가산", "code": "T31022", "f": 683.5, "g": 1144.4, "growth": -40.3, "opendate": "2014-05-01", "note": null}, {"name": "롯데아울렛동부산", "code": "T36404", "f": 651.8, "g": 604.3, "growth": 7.9, "opendate": "2014-12-04", "note": null}, {"name": "현대아울렛남양주", "code": "T32057", "f": 601.0, "g": 553.7, "growth": 8.5, "opendate": "2020-10-19", "note": "복합매장"}], "bottom": [{"name": "NC청주", "code": "T34303", "f": 49.4, "g": 116.8, "growth": -57.7, "opendate": "2019-09-27", "note": null}, {"name": "모다아울렛진주", "code": "T36009", "f": 57.1, "g": 60.2, "growth": -5.2, "opendate": "2016-07-01", "note": null}, {"name": "롯데아울렛구리", "code": "T32018", "f": 85.3, "g": 84.5, "growth": 1.0, "opendate": "2014-12-04", "note": null}, {"name": "한섬아울렛광주", "code": "T35604", "f": 87.8, "g": 82.8, "growth": 6.1, "opendate": "2020-03-01", "note": null}, {"name": "롯데아울렛고양원흥", "code": "T32030", "f": 96.6, "g": 117.7, "growth": -17.9, "opendate": "2017-10-19", "note": null}, {"name": "NC부산대", "code": "T36501", "f": 101.2, "g": 109.8, "growth": -7.9, "opendate": "2024-09-02", "note": null}, {"name": "동아수성", "code": "T36603", "f": 101.3, "g": 115.8, "growth": -12.6, "opendate": "2013-08-02", "note": null}]}, "쇼핑몰": {"total": 13, "top": [{"name": "타임스퀘어", "code": "T41002", "f": 1037.7, "g": 972.1, "growth": 6.7, "opendate": "2013-01-01", "note": null}, {"name": "스타필드하남", "code": "T42004", "f": 951.2, "g": 1201.9, "growth": -20.9, "opendate": "2018-12-20", "note": null}, {"name": "스타필드고양", "code": "T42001", "f": 833.9, "g": 684.6, "growth": 21.8, "opendate": "2017-08-01", "note": null}, {"name": "롯데몰월드", "code": "T41006", "f": 819.6, "g": 1049.1, "growth": -21.9, "opendate": "2014-08-01", "note": null}, {"name": "스타필드수원", "code": "T42011", "f": 747.3, "g": 1047.9, "growth": -28.7, "opendate": "2024-01-24", "note": null}, {"name": "스타필드코엑스몰", "code": "T41024", "f": 634.6, "g": 296.1, "growth": 114.4, "opendate": "2025-03-14", "note": null}, {"name": "스타필드안성", "code": "T42012", "f": 634.5, "g": 633.1, "growth": 0.2, "opendate": "2024-11-01", "note": null}], "bottom": [{"name": "스타필드시티부천", "code": "T42008", "f": 210.1, "g": 212.1, "growth": -0.9, "opendate": "2021-02-25", "note": null}, {"name": "롯데몰수지", "code": "T42005", "f": 238.0, "g": 224.3, "growth": 6.1, "opendate": "2019-08-30", "note": null}, {"name": "타임스트림", "code": "T41019", "f": 248.7, "g": 242.7, "growth": 2.4, "opendate": "2021-07-22", "note": null}, {"name": "메타폴리스몰", "code": "T42010", "f": 427.3, "g": 445.9, "growth": -4.2, "opendate": "2022-04-01", "note": null}, {"name": "스퀘어원", "code": "T42501", "f": 498.5, "g": 484.2, "growth": 3.0, "opendate": "2015-09-10", "note": null}]}, "직영가두점": {"total": 3, "top": [{"name": "양재직영점", "code": "T41014", "f": 317.9, "g": 311.4, "growth": 2.1, "opendate": "2018-12-19", "note": null}, {"name": "테헤란로점", "code": "T41023", "f": 233.2, "g": 235.6, "growth": -1.0, "opendate": "2024-10-02", "note": null}, {"name": "잠실새내", "code": "T41022", "f": 203.6, "g": 166.0, "growth": 22.7, "opendate": "2024-05-17", "note": null}], "bottom": []}, "대리점": {"total": 17, "top": [{"name": "경산점", "code": "T26207", "f": 345.7, "g": 235.7, "growth": 46.7, "opendate": "2020-09-08", "note": null}, {"name": "제주이도점", "code": "T27004", "f": 311.7, "g": null, "growth": null, "opendate": "2026-05-06", "note": "26년도 오픈"}, {"name": "광주세정점", "code": "T25610", "f": 270.6, "g": 243.5, "growth": 11.2, "opendate": "2023-12-07", "note": null}, {"name": "해남점", "code": "T25012", "f": 192.1, "g": 208.1, "growth": -7.7, "opendate": "2018-09-05", "note": null}, {"name": "광주용봉점", "code": "T25608", "f": 189.4, "g": 143.1, "growth": 32.3, "opendate": "2021-07-13", "note": null}, {"name": "광주첨단점", "code": "T25607", "f": 174.9, "g": 143.6, "growth": 21.8, "opendate": "2019-07-08", "note": null}, {"name": "구미옥계해마루벨리점", "code": "T26204", "f": 166.9, "g": 164.9, "growth": 1.2, "opendate": "2016-05-23", "note": null}], "bottom": [{"name": "강릉점", "code": "T23013", "f": 46.4, "g": 51.2, "growth": -9.5, "opendate": "2024-07-19", "note": null}, {"name": "원주점", "code": "T23005", "f": 94.2, "g": 98.8, "growth": -4.7, "opendate": "2014-12-09", "note": null}, {"name": "광양중마점", "code": "T25004", "f": 102.3, "g": 103.7, "growth": -1.3, "opendate": "2013-11-06", "note": null}, {"name": "김천혁신점", "code": "T26208", "f": 104.9, "g": 84.0, "growth": 24.9, "opendate": "2022-06-21", "note": null}, {"name": "서산점", "code": "T24001", "f": 108.2, "g": 107.1, "growth": 1.0, "opendate": "2011-03-31", "note": null}, {"name": "삼척점", "code": "T23001", "f": 112.0, "g": 92.2, "growth": 21.5, "opendate": "2010-09-02", "note": null}, {"name": "구제주점", "code": "T27002", "f": 117.0, "g": 114.6, "growth": 2.2, "opendate": "2017-06-14", "note": null}]}, "입점몰": {"total": 17, "top": [{"name": "퀸잇", "code": "T51032", "f": 995.7, "g": 2290.0, "growth": -56.5, "opendate": "2021-06-10", "note": null}, {"name": "롯데ON", "code": "T51021", "f": 370.0, "g": 1472.8, "growth": -74.9, "opendate": "2018-08-01", "note": null}, {"name": "SSG닷컴", "code": "T51030", "f": 344.0, "g": 252.4, "growth": 36.3, "opendate": "2020-08-05", "note": null}, {"name": "SSF샵", "code": "T51043", "f": 161.1, "g": 187.6, "growth": -14.1, "opendate": "2025-02-01", "note": null}, {"name": "네이버(스토어팜)", "code": "T51010", "f": 156.9, "g": 349.3, "growth": -55.1, "opendate": "2016-12-12", "note": null}, {"name": "GS SHOP", "code": "T51002", "f": 141.3, "g": 609.0, "growth": -76.8, "opendate": "2016-08-16", "note": null}, {"name": "하프클럽", "code": "T51005", "f": 114.6, "g": 506.0, "growth": -77.4, "opendate": "2016-09-12", "note": null}], "bottom": [{"name": "패션플러스", "code": "T51042", "f": 1.4, "g": 1.1, "growth": 34.5, "opendate": "2024-10-01", "note": null}, {"name": "현대홈쇼핑", "code": "T51001", "f": 3.3, "g": 61.7, "growth": -94.6, "opendate": "2016-08-16", "note": null}, {"name": "롯데아이몰", "code": "T51014", "f": 6.5, "g": 145.7, "growth": -95.5, "opendate": "2017-05-22", "note": null}, {"name": "신세계라이브쇼핑", "code": "T51041", "f": 19.8, "g": 32.4, "growth": -39.0, "opendate": "2024-06-10", "note": null}, {"name": "LF몰", "code": "T51027", "f": 25.4, "g": 45.2, "growth": -43.9, "opendate": "2019-08-01", "note": null}, {"name": "포스티", "code": "T51037", "f": 90.3, "g": 503.9, "growth": -82.1, "opendate": "2022-08-30", "note": null}]}, "자사몰": {"total": 1, "top": [{"name": "자사몰", "code": "T51012", "f": 3064.6, "g": 2390.4, "growth": 28.2, "opendate": "2017-03-07", "note": null}], "bottom": []}}, "시스티나": {"백화점": {"total": 27, "top": [{"name": "현대서울", "code": "A11001", "f": 816.5, "g": 750.4, "growth": 8.8, "opendate": "2021-03-01", "note": null}, {"name": "AK수원", "code": "A12004", "f": 594.2, "g": 570.1, "growth": 4.2, "opendate": "2022-03-04", "note": null}, {"name": "현대판교", "code": "A12003", "f": 482.8, "g": 486.8, "growth": -0.8, "opendate": "2021-12-03", "note": null}, {"name": "용산아이파크", "code": "A11029", "f": 462.9, "g": 404.1, "growth": 14.6, "opendate": "2024-10-25", "note": null}, {"name": "롯데잠실", "code": "A11020", "f": 447.0, "g": 661.7, "growth": -32.4, "opendate": "2023-12-29", "note": null}, {"name": "롯데부산", "code": "A16402", "f": 371.0, "g": 463.2, "growth": -19.9, "opendate": "2023-07-01", "note": null}, {"name": "롯데포항", "code": "A16202", "f": 326.5, "g": 288.8, "growth": 13.1, "opendate": "2024-03-05", "note": null}], "bottom": [{"name": "롯데건대", "code": "A11027", "f": 74.3, "g": 61.5, "growth": 20.7, "opendate": "2024-08-16", "note": null}, {"name": "롯데중동", "code": "A12012", "f": 91.4, "g": 109.2, "growth": -16.3, "opendate": "2023-09-26", "note": null}, {"name": "신세계하남", "code": "A12013", "f": 92.0, "g": 244.2, "growth": -62.3, "opendate": "2024-02-07", "note": null}, {"name": "현대킨텍스", "code": "A12018", "f": 115.4, "g": 149.2, "growth": -22.6, "opendate": "2024-09-06", "note": null}, {"name": "롯데강남", "code": "A11032", "f": 118.3, "g": null, "growth": null, "opendate": "2025-10-02", "note": null}, {"name": "현대천호", "code": "A11013", "f": 137.8, "g": 125.0, "growth": 10.2, "opendate": "2023-04-24", "note": null}, {"name": "롯데안산", "code": "A12015", "f": 145.9, "g": 189.6, "growth": -23.0, "opendate": "2024-03-01", "note": null}]}, "아울렛": {"total": 10, "top": [{"name": "현대아울렛김포", "code": "A32040", "f": 810.8, "g": 520.1, "growth": 55.9, "opendate": "2022-08-01", "note": null}, {"name": "롯데아울렛광주수완", "code": "A35607", "f": 483.5, "g": 525.8, "growth": -8.0, "opendate": "2023-09-26", "note": null}, {"name": "롯데아울렛광주월드컵", "code": "A35606", "f": 399.5, "g": 404.2, "growth": -1.1, "opendate": "2023-05-24", "note": null}, {"name": "롯데아울렛동부산", "code": "A36401", "f": 385.4, "g": 405.3, "growth": -4.9, "opendate": "2022-10-14", "note": null}, {"name": "롯데아울렛은평", "code": "A31001", "f": 244.0, "g": 210.3, "growth": 16.1, "opendate": "2024-11-15", "note": null}, {"name": "현대시티아울렛대구", "code": "A36601", "f": 237.2, "g": 263.8, "growth": -10.1, "opendate": "2024-09-19", "note": null}, {"name": "현대아울렛가산", "code": "A31046", "f": 188.3, "g": 284.5, "growth": -33.8, "opendate": "2022-08-16", "note": null}], "bottom": [{"name": "롯데피트인산본", "code": "A32061", "f": 110.1, "g": 28.1, "growth": 292.1, "opendate": "2025-06-01", "note": null}, {"name": "롯데아울렛이천", "code": "A32064", "f": 152.8, "g": null, "growth": null, "opendate": "2025-08-01", "note": null}]}, "쇼핑몰": {"total": 18, "top": [{"name": "스타필드고양", "code": "A42016", "f": 1419.7, "g": 1728.9, "growth": -17.9, "opendate": "2021-08-18", "note": null}, {"name": "롯데몰월드", "code": "A41021", "f": 923.9, "g": 755.0, "growth": 22.4, "opendate": "2021-04-01", "note": null}, {"name": "스타필드수원", "code": "A42021", "f": 705.1, "g": 642.9, "growth": 9.7, "opendate": "2024-01-24", "note": null}, {"name": "파르나스몰", "code": "A41023", "f": 649.6, "g": 706.6, "growth": -8.1, "opendate": "2021-10-28", "note": null}, {"name": "스퀘어원", "code": "A42503", "f": 589.9, "g": 553.8, "growth": 6.5, "opendate": "2022-09-02", "note": null}, {"name": "스타필드안성", "code": "A42023", "f": 422.3, "g": 382.1, "growth": 10.5, "opendate": "2024-11-08", "note": null}, {"name": "스타필드빌리지운정", "code": "A42029", "f": 324.3, "g": null, "growth": null, "opendate": "2025-12-04", "note": null}], "bottom": [{"name": "현대커넥트부산", "code": "A46401", "f": 105.1, "g": 248.0, "growth": -57.6, "opendate": "2024-09-06", "note": null}, {"name": "롯데몰광복", "code": "A46402", "f": 131.8, "g": null, "growth": null, "opendate": "2025-09-30", "note": null}, {"name": "아이파크고척", "code": "A41028", "f": 149.1, "g": 122.6, "growth": 21.6, "opendate": "2022-12-22", "note": null}, {"name": "스타필드시티부천", "code": "A42028", "f": 151.8, "g": null, "growth": null, "opendate": "2025-11-21", "note": null}, {"name": "스타필드시티위례", "code": "A42024", "f": 154.4, "g": 69.0, "growth": 123.7, "opendate": "2025-03-14", "note": null}, {"name": "마곡원그로브", "code": "A41037", "f": 199.8, "g": 15.6, "growth": 1176.6, "opendate": "2025-05-30", "note": null}, {"name": "엔터식스천호", "code": "A41029", "f": 234.8, "g": 232.5, "growth": 1.0, "opendate": "2023-01-17", "note": null}]}, "직영가두점": {"total": 2, "top": [{"name": "양재직영점", "code": "A41033", "f": 287.4, "g": 326.6, "growth": -12.0, "opendate": "2023-10-06", "note": null}, {"name": "선릉직영점", "code": "A41040", "f": 128.7, "g": null, "growth": null, "opendate": "2025-10-23", "note": null}], "bottom": []}, "대리점": {"total": 3, "top": [{"name": "인덕원점", "code": "A22013", "f": 183.3, "g": 155.0, "growth": 18.2, "opendate": "2023-03-17", "note": null}, {"name": "광주세정점", "code": "A25604", "f": 141.8, "g": 148.7, "growth": -4.7, "opendate": "2022-09-05", "note": null}, {"name": "제주이도점", "code": "A27002", "f": 111.0, "g": 93.6, "growth": 18.6, "opendate": "2022-09-15", "note": null}], "bottom": []}, "입점몰": {"total": 17, "top": [{"name": "롯데ON", "code": "A51021", "f": 316.5, "g": 1203.7, "growth": -73.7, "opendate": "2020-01-19", "note": null}, {"name": "SSG닷컴", "code": "A51030", "f": 198.5, "g": 205.2, "growth": -3.3, "opendate": "2021-02-15", "note": null}, {"name": "퀸잇", "code": "A51032", "f": 192.7, "g": 216.4, "growth": -10.9, "opendate": "2021-06-10", "note": null}, {"name": "W컨셉", "code": "A51036", "f": 130.5, "g": 234.5, "growth": -44.4, "opendate": "2022-03-01", "note": null}, {"name": "네이버(스토어팜)", "code": "A51010", "f": 129.9, "g": 192.1, "growth": -32.4, "opendate": "2021-02-01", "note": null}, {"name": "SSF샵", "code": "A51043", "f": 102.2, "g": 186.7, "growth": -45.3, "opendate": "2025-02-01", "note": null}, {"name": "GS SHOP", "code": "A51002", "f": 64.6, "g": 284.1, "growth": -77.3, "opendate": "2020-09-10", "note": null}], "bottom": [{"name": "패션플러스", "code": "A51042", "f": 0.1, "g": null, "growth": null, "opendate": "2024-10-01", "note": null}, {"name": "현대홈쇼핑", "code": "A51001", "f": 0.5, "g": 3.6, "growth": -85.0, "opendate": "2024-05-07", "note": null}, {"name": "신세계라이브쇼핑", "code": "A51041", "f": 5.0, "g": 5.7, "growth": -12.6, "opendate": "2024-06-10", "note": null}, {"name": "롯데아이몰", "code": "A51014", "f": 8.5, "g": 106.8, "growth": -92.0, "opendate": "2020-01-19", "note": null}, {"name": "하프클럽", "code": "A51005", "f": 21.7, "g": 59.3, "growth": -63.5, "opendate": "2020-01-19", "note": null}, {"name": "무신사", "code": "A51051", "f": 32.7, "g": 99.5, "growth": -67.1, "opendate": "2021-04-21", "note": null}, {"name": "포스티", "code": "A51037", "f": 59.2, "g": 412.3, "growth": -85.6, "opendate": "2022-06-10", "note": null}]}, "자사몰": {"total": 1, "top": [{"name": "자사몰", "code": "A51012", "f": 1628.2, "g": 1225.6, "growth": 32.9, "opendate": "2020-05-21", "note": null}], "bottom": []}}};
+
+const brandOrder = ["쉬즈미스","리스트","시스티나"];
+const brandColor = {"쉬즈미스":"var(--brand-szm)","리스트":"var(--brand-list)","시스티나":"var(--brand-sysn)"};
+const channelOrder = ["백화점","아울렛","쇼핑몰","직영가두점","팩토리아울렛","대리점","입점몰","자사몰"];
+
+function fmtNum(v){
+  if(v===null||v===undefined) return "-";
+  return v.toLocaleString('ko-KR',{minimumFractionDigits:1,maximumFractionDigits:1});
+}
+function growthCell(g, opendate){
+  const isNew = (g===null || g===undefined);
+  if(isNew){
+    return `<td class="growth-na">N/A<span class="new-tag">신규</span></td>`;
+  }
+  const cls = g>=0 ? "growth-up" : "growth-down";
+  const sign = g>0 ? "+" : "";
+  return `<td class="${cls}">${sign}${g.toFixed(1)}%</td>`;
+}
+
+function buildTable(list, type){
+  if(!list || list.length===0){
+    return `<div class="table-card ${type}"><div class="cap">${type==='top'?'▲ 상위 7개점':'▼ 하위 7개점'}</div><div class="empty-note">해당 없음 (표본 부족 또는 전 매장 상위 선정)</div></div>`;
+  }
+  let rows = list.map((d,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td class="name">${d.name}${(new Date(d.opendate) >= new Date('2026-01-01')) ? '<span class="new-tag">신규</span>' : ''}</td>
+      <td>${fmtNum(d.f)}</td>
+      <td>${fmtNum(d.g)}</td>
+      ${growthCell(d.growth, d.opendate)}
+    </tr>`).join("");
+  return `
+  <div class="table-card ${type}">
+    <div class="cap">${type==='top'?'▲ 상위 '+list.length+'개점':'▼ 하위 '+list.length+'개점'}</div>
+    <table>
+      <thead><tr>
+        <th>#</th><th>매장명</th><th>26년 누계(백만)</th><th>25년 동기(백만)</th><th>신장률</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
+}
+
+function buildChannel(brand, channel, obj){
+  const body = `
+    <div class="tables-wrap">
+      ${buildTable(obj.top, 'top')}
+      ${buildTable(obj.bottom, 'bottom')}
+    </div>`;
+  return `
+  <div class="channel-block">
+    <div class="channel-header" onclick="this.parentElement.classList.toggle('open')">
+      <div class="left">
+        <span class="channel-chevron"></span>
+        <h3>${channel}</h3>
+      </div>
+      <div class="meta">전체 ${obj.total}개점 · 상위 ${obj.top.length} · 하위 ${obj.bottom.length}</div>
+    </div>
+    <div class="channel-body">${body}</div>
+  </div>`;
+}
+
+function buildBrand(brand){
+  const channels = channelOrder.filter(c => DATA[brand] && DATA[brand][c]);
+  const totalStores = channels.reduce((s,c)=>s+DATA[brand][c].total,0);
+  const channelHtml = channels.map(c => buildChannel(brand, c, DATA[brand][c])).join("");
+  return `
+  <div class="brand-block">
+    <div class="brand-header" onclick="this.parentElement.classList.toggle('open')">
+      <div class="left">
+        <span class="brand-tag" style="background:${brandColor[brand]}"></span>
+        <h2>${brand}</h2>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div class="meta">${channels.length}개 유통망 · 총 ${totalStores}개점</div>
+        <span class="chevron"></span>
+      </div>
+    </div>
+    <div class="brand-body">${channelHtml}</div>
+  </div>`;
+}
+
+document.getElementById('root').innerHTML = brandOrder.filter(b=>DATA[b]).map(buildBrand).join("");
+// open first brand by default
+document.querySelector('.brand-block').classList.add('open');
+</script>
+</body>
+</html>
